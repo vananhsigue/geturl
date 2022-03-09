@@ -1,0 +1,49 @@
+import requests # import module to send HTTP requests
+url = 'https://www.census.gov/programs-surveys/popest.html' # define the URL 
+source = requests.get(url) # get the object
+data = source.text
+from bs4 import BeautifulSoup # parse data package to scrape the website
+soup = BeautifulSoup(data,'html.parser')
+tags = soup.find_all('a')
+print('Number of all href attributes retrieved: ', len(tags))
+for tag in tags:
+    print(tag.get('href'))
+all_link=[]
+# recognizes relative links and converts them to an absolute format.
+from urllib.parse import urljoin
+base = 'https://www.census.gov/'
+abs_link = []
+for link in tags:
+    href = link.get('href')
+    all_link.append(href)
+    if href is not None and not href.startswith('#'): # ignore hash tag
+        # relative link
+        if not href.startswith('http'):
+            href = urljoin(base, href)
+        abs_link.append(href)
+# distinct list of links
+unique_url = list(set(abs_link))
+print('Total count of absolute urls: ', len(abs_link))
+print('Length of unique urls: ', len(set(unique_url)))
+# import cvs to put the extracted links together, open a file for writing
+import csv
+with open('us_census_all_links.csv','w') as f:
+    csv_f = csv.writer(f)
+    csv_f.writerow (['list of vdn'])
+    for link in all_link:
+        csv_f.writerow([link])
+with open ('US_census_absolute_link.csv','w',newline='') as f:
+    csv_f = csv.writer(f)
+    csv_f.writerow(['List of Links'])
+    for link in abs_link: 
+        csv_f.writerow([link])
+with open ('US_census_unique_link.csv','w',newline='') as f:
+    csv_f = csv.writer(f)
+    csv_f.writerow(['List of Links'])
+    for link in unique_url: 
+        csv_f.writerow([link])
+    f.close()
+
+
+
+
